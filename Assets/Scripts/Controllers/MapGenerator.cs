@@ -101,53 +101,43 @@ namespace TerrainSystem
 
         public void GenerateMap(List<Vector3> points)
         {
-            //Used on the points
-            //Factory.CreateCorner(Vector3 position, Vector3 size)
-
-            //Used to create segements between the points
-            //Factory.CreateGap(Vector3 startPos, Vector3 endPos)
-            //Factory.CreatePlatform(Vector3 startPos, Vector3 endPos)
-            //Factory.CreateRamp(Vector3 startPos, Vector3 endPos)
-
-            
-            List<NodeSegement> segements = new List<NodeSegement>();            
-
-            //First, we generate all the corners
-            for (int i = 1; i < points.Count - 1; i++) //We ignore first and last since those are endpoints
-            {
-                Vector3 size = new Vector3(1, 1, 1); // Adjust size as needed
-                segements.Add(Factory.CreateCorner(points[i], size));
-            }
-
             //First segement is always a platform
-            Factory.CreatePlatform(points[0], points[1]);
-
-            //Last segement is always a ramp
-            Factory.CreateRamp(points[points.Count - 2], points[points.Count - 1]);
+            List<NodeSegement> orderedSegments = new List<NodeSegement>();
+            orderedSegments.Add(start);
+            orderedSegments.Add(Factory.CreatePlatform(points[0], points[1]));
 
             //All segements inbetween are random, if elevation change, then its a platform
             bool gapLastMade = false;
-            for (int i = 1; i < points.Count - 2; i++)
+            for (int i = 1; i < points.Count - 2; i++) //second to last seg is ramp, last point is exit
             {
                 Vector3 startPos = points[i];
                 Vector3 endPos = points[i + 1];
 
-                if(startPos.y != endPos.y)
-                    Factory.CreateRamp(startPos, endPos);
+                Vector3 size = new Vector3(1, 1, 1); // Adjust size as needed
+                orderedSegments.Add(Factory.CreateCorner(points[i], size));
+
+                if (startPos.y != endPos.y)
+                    orderedSegments.Add(Factory.CreateRamp(startPos, endPos));
                 else
                 {
                     if (!gapLastMade && Random.value <= GAP_CHANCE)
                     {
                         gapLastMade = true;
-                        Factory.CreateGap(startPos, endPos);
+                        orderedSegments.Add(Factory.CreateGap(startPos, endPos));
                     }
                     else
                     {
                         gapLastMade = false;
-                        Factory.CreatePlatform(startPos, endPos);
+                        orderedSegments.Add(Factory.CreatePlatform(startPos, endPos));
                     }
                 }
+
+                
             }
+
+            //last seg always ramp
+            orderedSegments.Add(Factory.CreateRamp(points[points.Count - 2], points[points.Count - 1]));
+            orderedSegments.Add(end);
         }
 
 
