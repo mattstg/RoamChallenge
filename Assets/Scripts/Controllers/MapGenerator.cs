@@ -8,6 +8,9 @@ namespace TerrainSystem
 {
     public class MapGenerator
     {
+        const float MIN_BUFFER = .3f;
+        const float MIN_END_BUFFER = 2f;
+
         GameManager gameManager;
         EndPoint start => gameManager.chain.start;
         EndPoint end => gameManager.chain.end;
@@ -26,20 +29,21 @@ namespace TerrainSystem
             List<Vector3> points = new List<Vector3>();
 
             // Add the start point
-            points.Add(startPos);
+            //points.Add(startPos);
 
             // Generate random points between start and end
             Vector3 direction = (endPos - startPos).normalized; // Base direction
             float totalDistance = Vector3.Distance(startPos, endPos); // Total length of the spline
 
             float accumulatedDistance = 0f;
+            float segmentLength = totalDistance / segements;
+            float minSegementLength = segmentLength * .3f;
 
             for (int i = 1; i < segements; i++)
             {
                 // Calculate random offset for the length variation
-                float segmentLength = totalDistance / segements;
                 float randomLengthOffset = UnityEngine.Random.Range(-lengthVariation, lengthVariation);
-                float stepLength = Mathf.Clamp(segmentLength + randomLengthOffset, 0.1f, totalDistance - accumulatedDistance);
+                float stepLength = Mathf.Clamp(segmentLength + randomLengthOffset, minSegementLength, totalDistance - accumulatedDistance);
                 accumulatedDistance += stepLength;
 
                 // Calculate the base point along the straight line
@@ -55,11 +59,17 @@ namespace TerrainSystem
                 // Final point calculation
                 Vector3 finalPoint = straightPoint + perp * curveOffset + Vector3.up * heightOffset;
 
+                if (Vector3.Distance(startPos, finalPoint) + MIN_END_BUFFER > totalDistance)
+                {
+                    gameManager.warningController.Warning("Length variation too high, generated point was cut off");
+                    break;
+                }
+
                 points.Add(finalPoint);
             }
 
             // Add the end point
-            points.Add(endPos);
+            //points.Add(endPos);
 
             return points;
         }

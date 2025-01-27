@@ -7,6 +7,7 @@ namespace Controllers
     {
         public ControlsUI controlsUI;
         public Chain chain;
+        public WarningController warningController;
 
         Controller controller;
         MapGenerator mapGenerator;
