@@ -298,6 +298,12 @@ public static class MathHelper  {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int RandomSign()
+    {
+        return BooleanSign(Random.Range(0, 2) == 0);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int IncreaseLoopingValueWithMod(int v, int modV)
     {
         return (v + 1) % modV;

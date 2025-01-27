@@ -1,6 +1,7 @@
 using Controllers;
 using NUnit.Framework;
 using System.Collections.Generic;
+using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 using static UnityEngine.Rendering.HableCurve;
 
@@ -8,18 +9,21 @@ namespace TerrainSystem
 {
     public class MapGenerator
     {
+        public static readonly float WORLD_FLOOR = -5;
+        const float GAP_CHANCE = .2f;
         const float MIN_BUFFER = .3f;
         const float MIN_END_BUFFER = 2f;
+        const float HEIGHT_INCREMENT = 1f;
 
         GameManager gameManager;
-        EndPoint start => gameManager.chain.start;
-        EndPoint end => gameManager.chain.end;
+        EndPoint start => gameManager.startPt;
+        EndPoint end => gameManager.endPt;
         public MapGenerator(GameManager gameManager)
         {
             this.gameManager = gameManager;
         }
 
-        public List<Vector3> GenerateMap(int segements, float lengthVariation, float curviness, float heightChance)
+        public List<Vector3> GeneratePoints(int segements, float lengthVariation, float curviness, float heightChance)
         {
             // Get the start and end positions
             Vector3 startPos = start.transform.position; 
@@ -29,7 +33,7 @@ namespace TerrainSystem
             List<Vector3> points = new List<Vector3>();
 
             // Add the start point
-            //points.Add(startPos);
+            points.Add(startPos);
 
             // Generate random points between start and end
             Vector3 direction = (endPos - startPos).normalized; // Base direction
@@ -53,11 +57,32 @@ namespace TerrainSystem
                 Vector3 perp = Vector3.Cross(direction, Vector3.up).normalized; // Perpendicular vector
                 float curveOffset = UnityEngine.Random.Range(-curviness, curviness);
 
-                // Introduce height variation
-                float heightOffset = UnityEngine.Random.value < heightChance ? UnityEngine.Random.Range(-1f, 1f) : 0f;
-
+                // Introduce height variation, but only ever other point
+                Vector3 previousHeight = points[i - 1];
+                previousHeight.x = 0;
+                previousHeight.z = 0;
+                float heightOffset;
+                if (i % 2 == 0)
+                {
+                    if (previousHeight.y <= 0)
+                    {
+                        //we are at floor, so dont move or go up
+                        heightOffset = UnityEngine.Random.value < heightChance ? HEIGHT_INCREMENT : 0f;
+                    }
+                    else
+                    {
+                        heightOffset = UnityEngine.Random.value < heightChance ? MathHelper.RandomSign() * HEIGHT_INCREMENT : 0f;
+                    }
+                }
+                else
+                {
+                    heightOffset = 0;
+                }
                 // Final point calculation
-                Vector3 finalPoint = straightPoint + perp * curveOffset + Vector3.up * heightOffset;
+                straightPoint = new Vector3(straightPoint.x, 0, straightPoint.z);
+                perp = new Vector3(perp.x, 0, perp.z);
+
+                Vector3 finalPoint = straightPoint + perp * curveOffset + Vector3.up * heightOffset + previousHeight;
 
                 if (Vector3.Distance(startPos, finalPoint) + MIN_END_BUFFER > totalDistance)
                 {
@@ -69,11 +94,62 @@ namespace TerrainSystem
             }
 
             // Add the end point
-            //points.Add(endPos);
+            points.Add(endPos);
 
             return points;
         }
 
-        
+        public void GenerateMap(List<Vector3> points)
+        {
+            //Used on the points
+            //Factory.CreateCorner(Vector3 position, Vector3 size)
+
+            //Used to create segements between the points
+            //Factory.CreateGap(Vector3 startPos, Vector3 endPos)
+            //Factory.CreatePlatform(Vector3 startPos, Vector3 endPos)
+            //Factory.CreateRamp(Vector3 startPos, Vector3 endPos)
+
+            
+            List<NodeSegement> segements = new List<NodeSegement>();            
+
+            //First, we generate all the corners
+            for (int i = 1; i < points.Count - 1; i++) //We ignore first and last since those are endpoints
+            {
+                Vector3 size = new Vector3(1, 1, 1); // Adjust size as needed
+                segements.Add(Factory.CreateCorner(points[i], size));
+            }
+
+            //First segement is always a platform
+            Factory.CreatePlatform(points[0], points[1]);
+
+            //Last segement is always a ramp
+            Factory.CreateRamp(points[points.Count - 2], points[points.Count - 1]);
+
+            //All segements inbetween are random, if elevation change, then its a platform
+            bool gapLastMade = false;
+            for (int i = 1; i < points.Count - 2; i++)
+            {
+                Vector3 startPos = points[i];
+                Vector3 endPos = points[i + 1];
+
+                if(startPos.y != endPos.y)
+                    Factory.CreateRamp(startPos, endPos);
+                else
+                {
+                    if (!gapLastMade && Random.value <= GAP_CHANCE)
+                    {
+                        gapLastMade = true;
+                        Factory.CreateGap(startPos, endPos);
+                    }
+                    else
+                    {
+                        gapLastMade = false;
+                        Factory.CreatePlatform(startPos, endPos);
+                    }
+                }
+            }
+        }
+
+
     }
 }
