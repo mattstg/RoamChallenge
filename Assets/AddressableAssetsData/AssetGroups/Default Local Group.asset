@@ -14,7 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_GroupName: Default Local Group
   m_GUID: e09fcaf4401064b4d9604c03abd5f283
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 5a78c40c979193247b1729b51a4330df
+    m_Address: Assets/Terrain/Cylinder.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Node
+    - Terrain
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 74d83ff0c55433540a08ade6ace9db52
+    m_Address: Assets/Terrain/Cube.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Segement
+    - Terrain
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: e61dea9c80c773241a3add70b4453787, type: 2}
   m_SchemaSet:
