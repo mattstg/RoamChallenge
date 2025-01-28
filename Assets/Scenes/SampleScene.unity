@@ -1154,7 +1154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca12e520ac88dfa40b343c31e655ab96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiGrid: {fileID: 0}
+  uiGrid: {fileID: 114000778}
   hotkeyUIPrefab: {fileID: 5630102256452588193, guid: 9047dfb034554dc499b5d9d1f8b5257e, type: 3}
 --- !u!114 &501203812
 MonoBehaviour:

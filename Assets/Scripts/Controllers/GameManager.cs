@@ -19,6 +19,7 @@ namespace Controllers
             Factory.SetupFactory(chain.transform);
             mapGenerator = new MapGenerator(this);
             controller = new Controller(this);
+            controlsUI.SetupUIDict();
         }
 
         void Update()
@@ -38,7 +39,10 @@ namespace Controllers
                         controller.SetSelected(clickedSegments[0]);
                     }
                 }
+                else
+                    controller.SetSelected(null);
             }
+            controller.Update();
         }
 
         [ExposeMethodInEditor()]

@@ -6,7 +6,7 @@ namespace Controllers
 {
     public class ControlsUI : MonoBehaviour
     {
-        public GridLayoutGroup uiGrid;
+        public Transform uiGrid;
         public GameObject hotkeyUIPrefab;
         Dictionary<ControllerActions, GameObject> hotkeyUIs = new Dictionary<ControllerActions, GameObject>();
         
@@ -15,8 +15,18 @@ namespace Controllers
             foreach(Transform t in uiGrid.transform)
             {
                 hotkeyUIs.Add((ControllerActions)System.Enum.Parse(typeof(ControllerActions), t.name), t.gameObject);
+                t.gameObject.SetActive(false);
             }
         }
+
+        public void NothingSelected()
+        {
+            foreach (Transform t in uiGrid.transform)
+            {
+                t.gameObject.SetActive(false);
+            }
+        }
+
         public void DisplayControls(ControllerActions[] visibleOptions)
         {
             hotkeyUIs.ForEach(kv => kv.Value.SetActive(false));
