@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -5,14 +6,24 @@ namespace Controllers
 {
     public class ControlsUI : MonoBehaviour
     {
-        public GridLayoutGroup singleGrid;
-        public GridLayoutGroup groupGrid;
+        public GridLayoutGroup uiGrid;
         public GameObject hotkeyUIPrefab;
-
-        // Update is called once per frame
-        void Update()
+        Dictionary<ControllerActions, GameObject> hotkeyUIs = new Dictionary<ControllerActions, GameObject>();
+        
+        public void SetupUIDict()
         {
-
+            foreach(Transform t in uiGrid.transform)
+            {
+                hotkeyUIs.Add((ControllerActions)System.Enum.Parse(typeof(ControllerActions), t.name), t.gameObject);
+            }
+        }
+        public void DisplayControls(ControllerActions[] visibleOptions)
+        {
+            hotkeyUIs.ForEach(kv => kv.Value.SetActive(false));
+            foreach (var option in visibleOptions)
+            {
+                hotkeyUIs[option].SetActive(true);
+            }
         }
     }
 }

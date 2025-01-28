@@ -4,7 +4,7 @@ using UnityEngine.SocialPlatforms.GameCenter;
 
 namespace TerrainSystem
 {
-    public enum NodeSegementType { Gap, Platform, Ramp, EndPt, Corner}
+    public enum NodeSegementType { EndPt, Corner, Platform, Ramp, Gap }
     public static class Factory 
     {
         static readonly float GAP_SIZE_REDUCTION = .8f; //So it doesnt overlap for clicking, although we can handle this with raycastall

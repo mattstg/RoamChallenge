@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using TerrainSystem;
 using UnityEngine;
 namespace Controllers
@@ -22,7 +23,22 @@ namespace Controllers
 
         void Update()
         {
-
+            if (Input.GetMouseButtonDown(0)) 
+            {
+                List<NodeSegement> clickedSegments = GetClickedNodeSegments();
+                if (clickedSegments.Count > 0)
+                {
+                    if(controller.selected == clickedSegments[0])
+                    {
+                        if(clickedSegments.Count > 1)
+                            controller.SetSelected(clickedSegments[1]);
+                    }
+                    else
+                    {
+                        controller.SetSelected(clickedSegments[0]);
+                    }
+                }
+            }
         }
 
         [ExposeMethodInEditor()]
@@ -50,5 +66,30 @@ namespace Controllers
             List<Vector3> points = mapGenerator.GeneratePoints(segements,lengthVariation, curvyness, heightChance);
             mapGenerator.GenerateMap(points);
         }
+
+        public List<NodeSegement> GetClickedNodeSegments()
+        {
+            // Ensure the main camera is available
+            Camera mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                Debug.LogError("No main camera found in the scene.");
+                return new List<NodeSegement>();
+            }
+
+            // Cast a ray from the mouse position
+            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit[] hits = Physics.RaycastAll(ray);
+
+            // Filter hits by objects with NodeSegement component
+            List<NodeSegement> nodeSegments = hits
+                .Select(hit => hit.collider.GetComponentInParent<NodeSegement>())
+                .Where(segment => segment != null)
+                .OrderBy(segment => segment.type) // Sort by NodeSegementType
+                .ToList();
+
+            return nodeSegments;
+        }
+
     }
 }
