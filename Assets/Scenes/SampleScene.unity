@@ -518,7 +518,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5630102256452588193, guid: 9047dfb034554dc499b5d9d1f8b5257e, type: 3}
       propertyPath: m_Name
-      value: Toggle Visible
+      value: ToggleVisible
       objectReference: {fileID: 0}
     - target: {fileID: 6324881718369418995, guid: 9047dfb034554dc499b5d9d1f8b5257e, type: 3}
       propertyPath: m_text
@@ -1556,11 +1556,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6324881718369418995, guid: 9047dfb034554dc499b5d9d1f8b5257e, type: 3}
       propertyPath: m_text
-      value: Group Height Shift +/-
+      value: Group Height Shift O/L
       objectReference: {fileID: 0}
     - target: {fileID: 6324881718369418995, guid: 9047dfb034554dc499b5d9d1f8b5257e, type: 3}
       propertyPath: m_fontSize
-      value: 26.3
+      value: 22.35
       objectReference: {fileID: 0}
     - target: {fileID: 6324881718369418995, guid: 9047dfb034554dc499b5d9d1f8b5257e, type: 3}
       propertyPath: m_fontStyle
@@ -1916,6 +1916,13 @@ MonoBehaviour:
   warningController: {fileID: 501203816}
   startPt: {fileID: 2080471885}
   endPt: {fileID: 6759691928622904857}
+  materials:
+  - {fileID: 2100000, guid: 2c8f8cdd3b6dfdf45b319622bc98416f, type: 2}
+  - {fileID: 2100000, guid: 730407b1403ca814fa758097d457e657, type: 2}
+  - {fileID: 2100000, guid: 9e3db5de9d0a99c4582f056af95dc838, type: 2}
+  - {fileID: 2100000, guid: bf105ae6d41a29e428fc3a60630fe328, type: 2}
+  - {fileID: 2100000, guid: 54d494398169d8840a1ab7b6ebb526b4, type: 2}
+  - {fileID: 2100000, guid: a46fadf6eb746ed43a92355353f2fa0b, type: 2}
   segements: 10
   lengthVariation: 0
   curvyness: 1

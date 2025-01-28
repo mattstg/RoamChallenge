@@ -153,3 +153,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7f6370bccda84947b30cc194b1f88c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nextSegements: []
+  previousSegements: []

@@ -12,82 +12,79 @@ namespace TerrainSystem
         public virtual ControllerActions[] availableSelectedOptions { get; }
         public List<NodeSegement> nextSegements = new List<NodeSegement>();
         public List<NodeSegement> previousSegements = new List<NodeSegement>();
+        protected MeshRenderer meshRenderer;
         public virtual void Initialize()
         {
-
+            meshRenderer = GetComponentInChildren<MeshRenderer>();
         }
         
         public virtual void ConvertToPlatform()
         {
-            Debug.Log("Convert to platform");
         }
 
         public virtual void ConvertToRamp()
         {
-            Debug.Log("Convert to ramp");
         }
 
         public virtual void ModWidth(bool increase)
         {
-            Debug.Log("Mod width");
         }
 
         public virtual void ModLength(bool increase)
         {
-            Debug.Log("Mod length");
         }
         public virtual void ModHeight(bool increase) 
         {
-            Debug.Log("Mod height");
         }
 
+        int currentTexture = 0;
         public virtual void CycleTexture(bool increase)
         {
-            Debug.Log("Cycle texture");
+            try
+            {
+                if (increase)
+                    currentTexture = currentTexture.IncreaseLoopingValue(GameManager.Instance.materials.Length);
+                else
+                    currentTexture = currentTexture.DecreaseLoopingValue(GameManager.Instance.materials.Length);
+                meshRenderer.material = GameManager.Instance.materials[currentTexture];
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error in : " + transform.name + e.Message);
+            }
         }
 
         public virtual void Delete()
         {
-            Debug.Log("Delete");
         }
 
         public virtual void Divide()
         {
-            Debug.Log("Divide");
         }
 
         public virtual void ToggleVisible()
         {
-            Debug.Log("Toggle visible");
         }
 
         public virtual void Move()
         {
-            Debug.Log("Move");
         }
 
         public virtual void Branch()
         {
-            Debug.Log("Branch");
         }
 
         public virtual void Group_width(bool increase)
         {
-            Debug.Log("Group width");
         }
 
         public virtual void Group_height(bool increase)
         {
-            Debug.Log("Group height");
         }
 
         public virtual void Group_texture(bool increase)
         {
-            Debug.Log("Group texture");
+            GameManager.controller.Group_texture(increase, this);
         }
-
-
-
-
     }
 }

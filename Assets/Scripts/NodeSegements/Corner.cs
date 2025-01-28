@@ -18,5 +18,18 @@ namespace TerrainSystem
             ControllerActions.Group_height,
             ControllerActions.Group_texture
         };
+
+
+        public override void ToggleVisible()
+        {
+            base.ToggleVisible();
+            meshRenderer.enabled = !meshRenderer.enabled;
+        }
+
+        public override void Delete()
+        {
+            base.Delete();
+            GameManager.controller.DeleteNode(this);
+        }
     }
 }

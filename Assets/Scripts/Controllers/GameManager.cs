@@ -6,16 +6,21 @@ namespace Controllers
 {
     public class GameManager : MonoBehaviour
     {
+        public static GameManager Instance; //lazy singleton
         public ControlsUI controlsUI;
         public Chain chain;
         public WarningController warningController;
         public EndPoint startPt;
         public EndPoint endPt;
+        public Material[] materials;
 
-        Controller controller;
+        public static Controller controller; //Should be singleton, but quick prototype dirty code
         MapGenerator mapGenerator;
         void Start()
         {
+            Instance = this;
+            startPt.Initialize();
+            endPt.Initialize();
             Factory.SetupFactory(chain.transform);
             mapGenerator = new MapGenerator(this);
             controller = new Controller(this);

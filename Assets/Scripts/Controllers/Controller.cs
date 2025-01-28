@@ -27,6 +27,8 @@ namespace Controllers
         GameManager manager;
         ControlsUI UI => manager.controlsUI;
         public NodeSegement selected;
+        public static float HEIGHT_MOD = 1;
+        public static float WIDTH_MOD = .25f;
 
         public Controller(GameManager manager)
         {
@@ -86,13 +88,13 @@ namespace Controllers
                 selected.ModWidth(false);
             }
             else if (Input.GetKeyDown(KeyCode.O))
-                selected.Group_height(true);
+                selected.ModHeight(true);
             else if (Input.GetKeyDown(KeyCode.L))
-                selected.Group_height(false);
+                selected.ModHeight(false);
             else if (Input.GetKeyDown(KeyCode.LeftBracket))
-                selected.Group_texture(false);
+                selected.CycleTexture(false);
             else if (Input.GetKeyDown(KeyCode.RightBracket))
-                selected.Group_texture(true);
+                selected.CycleTexture(true);
             else if (Input.GetKeyDown(KeyCode.Delete))
                 selected.Delete();
             else if (Input.GetKeyDown(KeyCode.D))
@@ -103,10 +105,104 @@ namespace Controllers
                 selected.Branch();
         }
 
-    
+        public void Group_height(bool increase, NodeSegement target)
+        {
+            List<NodeSegement> connectedNodes = GameManager.controller.GetAllConnectedSegements(target);
+            foreach (NodeSegement node in connectedNodes)
+            {
+                node.ModHeight(increase);
+            }
+
+            manager.chain.FixAllRamps();
+        }
+
+        public void Group_width(bool increase, NodeSegement target)
+        {
+            List<NodeSegement> connectedNodes = GameManager.controller.GetAllConnectedSegements(target);
+            foreach (NodeSegement node in connectedNodes)
+            {
+                node.ModWidth(increase);
+            }
+
+            manager.chain.FixAllRamps();
+        }
+
+        public void Group_texture(bool increase, NodeSegement target)
+        {
+            List<NodeSegement> connectedNodes = GameManager.controller.GetAllConnectedSegements(target);
+            foreach (NodeSegement node in connectedNodes)
+            {
+                node.CycleTexture(increase);
+            }
+        }
+
+        public List<NodeSegement> GetAllConnectedSegements(NodeSegement nodeSegement)
+        {
+            // Validate input
+            if (nodeSegement == null)
+                throw new ArgumentNullException(nameof(nodeSegement));
+
+            // Valid types for inclusion
+            var validTypes = new HashSet<NodeSegementType>
+            {
+                NodeSegementType.EndPt,
+                NodeSegementType.Corner,
+                NodeSegementType.Platform
+            };
+
+            // Set to track visited nodes and avoid infinite loops
+            HashSet<NodeSegement> visited = new HashSet<NodeSegement>();
+            List<NodeSegement> result = new List<NodeSegement>();
+
+            // Queue for breadth-first search
+            Queue<NodeSegement> toVisit = new Queue<NodeSegement>();
+            toVisit.Enqueue(nodeSegement);
+
+            while (toVisit.Count > 0)
+            {
+                NodeSegement current = toVisit.Dequeue();
+
+                // Skip if already visited
+                if (visited.Contains(current))
+                    continue;
+
+                // Mark as visited and add to result
+                visited.Add(current);
+                if (validTypes.Contains(current.type))
+                {
+                    result.Add(current);
+
+                    // Enqueue all valid neighbors (both forward and backward)
+                    foreach (NodeSegement next in current.nextSegements)
+                    {
+                        if (!visited.Contains(next) && validTypes.Contains(next.type))
+                        {
+                            toVisit.Enqueue(next);
+                        }
+                    }
+
+                    foreach (NodeSegement prev in current.previousSegements)
+                    {
+                        if (!visited.Contains(prev) && validTypes.Contains(prev.type))
+                        {
+                            toVisit.Enqueue(prev);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+        public void DeleteNode(Corner toDelete)
+        {
+            //GameObject.Destroy(toDelete.gameObject);
+        }
+
     }
 
 
-    
+
 
 }
