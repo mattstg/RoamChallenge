@@ -5,6 +5,8 @@ namespace TerrainSystem
 {
     public class Node : NodeSegement
     {
+        public Material selectedMat;
+        Material originalMat;
         public override void Group_height(bool increase)
         {
             GameManager.controller.Group_height(increase, this);
@@ -38,6 +40,20 @@ namespace TerrainSystem
                 segement.Fix();
         }
 
-        
+        bool isSelected = false;
+        public void SetSelected(bool setSelected)
+        {
+            if (!isSelected && setSelected)
+            {
+                originalMat = meshRenderer.material;
+                meshRenderer.material = selectedMat;
+            }
+            else
+            {
+                meshRenderer.material = originalMat;
+            }
+
+        }
+
     }
 }

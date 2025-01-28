@@ -5,6 +5,7 @@ namespace TerrainSystem
 {
     public class EndPoint : Node
     {
+        public bool isEnd = false;
         public override NodeSegementType type => NodeSegementType.EndPt;
         public override ControllerActions[] availableSelectedOptions => new ControllerActions[]
         {

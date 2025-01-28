@@ -13,6 +13,7 @@ namespace Controllers
         public EndPoint startPt;
         public EndPoint endPt;
         public Material[] materials;
+        public Material glowMat;
 
         public static Controller controller; //Should be singleton, but quick prototype dirty code
         MapGenerator mapGenerator;
@@ -128,7 +129,7 @@ namespace Controllers
             mapGenerator.GenerateMap(points);
         }
 
-        public List<NodeSegement> GetClickedNodeSegments()
+        public static List<NodeSegement> GetClickedNodeSegments()
         {
             // Ensure the main camera is available
             Camera mainCamera = Camera.main;

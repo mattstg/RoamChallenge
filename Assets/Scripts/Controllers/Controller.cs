@@ -102,7 +102,7 @@ namespace Controllers
             else if (Input.GetKeyDown(KeyCode.T))
                 selected.ToggleVisible();
             else if (Input.GetKeyDown(KeyCode.B))
-                selected.Branch();
+                Branch(selected);
         }
 
         public void Group_height(bool increase, NodeSegement target)
@@ -194,6 +194,90 @@ namespace Controllers
             return result;
         }
 
+        public void Branch(NodeSegement target)
+        {
+            if (target.type != NodeSegementType.Corner)
+            {
+                Debug.Log("Illegal");
+                return;
+            }
+
+            List<NodeSegement> clickedSegements = GameManager.GetClickedNodeSegments();
+            if (clickedSegements.Contains(target))
+            {
+                Debug.Log("Attempted to merge with ourselves, operation blocked, not allowed");
+            }
+            else if (clickedSegements.Count == 0)
+            {
+                Vector3 position = GetMousePositionOnPlane(target.transform.position.y);
+                Corner newCorner = Factory.CreateCorner(position, target.transform.localScale);
+                Platform newPlatform = Factory.CreatePlatform(target.transform.position, newCorner.transform.position);
+                newCorner.previousSegements.Add(newPlatform);
+                newPlatform.previousSegements.Add(target);
+                newPlatform.nextSegements.Add(newCorner);
+                target.nextSegements.Add(newPlatform);
+                SetSelected(newCorner);
+            }
+            else
+            {
+                //If we clicked another corner, we want to merge the paths
+                Node node = null;
+                foreach (NodeSegement segement in clickedSegements)
+                {
+                    if (segement.type == NodeSegementType.Corner || segement.type == NodeSegementType.EndPt)
+                    {
+                        node = segement as Node;
+                        break;
+                    }
+                }
+
+                if(node == null)
+                {
+                    Debug.Log("We tried to merge with a non-corner, illegal operation blocked");
+                }
+                else
+                {
+                    if (target.transform.position.y != node.transform.position.y)
+                    {
+                        Ramp newPlatform = Factory.CreateRamp(target.transform.position, node.transform.position);
+                        newPlatform.previousSegements.Add(target);
+                        newPlatform.nextSegements.Add(node);
+                        node.previousSegements.Add(newPlatform);
+                        target.nextSegements.Add(newPlatform);
+                    }
+                    else
+                    {
+                        Platform newPlatform = Factory.CreatePlatform(target.transform.position, node.transform.position);
+                        newPlatform.previousSegements.Add(target);
+                        newPlatform.nextSegements.Add(node);
+                        node.previousSegements.Add(newPlatform);
+                        target.nextSegements.Add(newPlatform);
+                    }
+                }
+
+            }
+
+            
+        }
+
+        private Vector3 GetMousePositionOnPlane(float targetY)
+        {
+            // Get the mouse position in screen coordinates
+            Vector3 mousePosition = Input.mousePosition;
+
+            // Create a ray from the camera to the mouse position
+            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+
+            // Calculate the intersection of the ray with the plane at targetY
+            if (ray.direction.y != 0) // Avoid division by zero
+            {
+                float distance = (targetY - ray.origin.y) / ray.direction.y; // Solve for distance to the plane
+                Vector3 intersectionPoint = ray.origin + ray.direction * distance;
+                return new Vector3(intersectionPoint.x, targetY, intersectionPoint.z);
+            }
+
+            return Vector3.zero; // Return zero if the ray is parallel to the plane
+        }
 
         public void DeleteNode(Corner toDelete)
         {

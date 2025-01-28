@@ -42,7 +42,6 @@ namespace Controllers
 
             start.nextSegements.Add(firstSegement);
             firstSegement.previousSegements.Add(start);
-            Debug.Log("First segement: " + firstSegement.GetInstanceID());
 
             end.previousSegements.Add(lastSegement);
             lastSegement.nextSegements.Add(end);
