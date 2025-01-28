@@ -52,24 +52,25 @@ namespace Controllers
                 children[i + 1].previousSegements.Add(children[i]);
             }
 
-            FixAllRamps();
+            FixAllRampsAndGaps();
         }
 
 
 
         #region repairs
 
-        public void FixAllRamps()
+        public void FixAllRampsAndGaps()
         {
             NodeSegement[] children = transform.ChildrenArray().CollectionFromForEach(t => t.GetComponent<NodeSegement>()).ToArray();
             foreach(NodeSegement nodeSegement in children)
             {
-                if(nodeSegement.type == NodeSegementType.Ramp)
+                if(nodeSegement.type == NodeSegementType.Ramp || nodeSegement.type == NodeSegementType.Gap)
                 {
                     nodeSegement.Fix();
                 }
             }
         }
+
 
 
         #endregion

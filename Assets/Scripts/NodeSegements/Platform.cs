@@ -1,6 +1,8 @@
 using Controllers;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace TerrainSystem
 {
@@ -9,10 +11,10 @@ namespace TerrainSystem
         public override NodeSegementType type => NodeSegementType.Platform;
         public override ControllerActions[] availableSelectedOptions => new ControllerActions[]
         {
+            ControllerActions.ConvertToRamp,
             ControllerActions.ModWidth,
             ControllerActions.CycleTexture,
             ControllerActions.Delete,
-            ControllerActions.Divide,
             ControllerActions.Group_width,
             ControllerActions.Group_height,
             ControllerActions.Group_texture
@@ -69,6 +71,42 @@ namespace TerrainSystem
             transform.localEulerAngles = new Vector3(0, transform.localEulerAngles.y, transform.localEulerAngles.z);
             transform.position = new Vector3(transform.position.x, prevPos.y, transform.position.z);
             transform.localScale = new Vector3(transform.localScale.x, prevPos.y - MapGenerator.WORLD_FLOOR, transform.localScale.z);
+        }
+
+        public override void ConvertToRamp()
+        {
+            base.ConvertToRamp();
+            NodeSegement next = nextSegements[0];
+            NodeSegement prev = previousSegements[0]; 
+
+            Ramp newPlatform = Factory.CreateRamp(next.transform.position, prev.transform.position);
+            newPlatform.previousSegements.Add(prev);
+            newPlatform.nextSegements.Add(next);
+            prev.nextSegements.Add(newPlatform);
+            next.previousSegements.Add(newPlatform);
+
+            prev.nextSegements.Remove(this);
+            next.previousSegements.Remove(this);
+            GameObject.DestroyImmediate(gameObject);
+            GameManager.controller.SetSelected(newPlatform);
+        }
+
+        public override void Delete()
+        {
+            base.Delete();
+            NodeSegement next = nextSegements[0];
+            NodeSegement prev = previousSegements[0];
+
+            Gap newPlatform = Factory.CreateGap(next.transform.position, prev.transform.position);
+            newPlatform.previousSegements.Add(prev);
+            newPlatform.nextSegements.Add(next);
+            prev.nextSegements.Add(newPlatform);
+            next.previousSegements.Add(newPlatform);
+
+            prev.nextSegements.Remove(this);
+            next.previousSegements.Remove(this);
+            GameObject.DestroyImmediate(gameObject);
+            GameManager.controller.SetSelected(newPlatform);
         }
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TerrainSystem;
 using UnityEngine;
+using UnityEngine.UI;
 namespace Controllers
 {
     public class GameManager : MonoBehaviour
@@ -14,6 +15,8 @@ namespace Controllers
         public EndPoint endPt;
         public Material[] materials;
         public Material glowMat;
+        public TMPro.TextMeshProUGUI warningText;
+        
 
         public static Controller controller; //Should be singleton, but quick prototype dirty code
         MapGenerator mapGenerator;
@@ -28,9 +31,28 @@ namespace Controllers
             controlsUI.SetupUIDict();
         }
 
-        
+        float warningTimer;
+        public void DisplayWarning(string text)
+        {
+            warningTimer = 3;
+            warningText.text = text;
+            warningText.gameObject.SetActive(true);
+        }
+
         void Update()
         {
+            if(warningTimer < 0)
+                warningText.gameObject.SetActive(false);
+
+            if(Input.GetKeyDown(KeyCode.G))
+            {
+                segements = int.Parse(segementsInput.text);
+                lengthVariation = float.Parse(lengthVariationInput.text);
+                curvyness = float.Parse(curvynessInput.text);
+                heightChance = float.Parse(heightChanceInput.text);
+                GenerateMap();
+            }
+
             if (Input.GetMouseButtonDown(0)) 
             {
                 List<NodeSegement> clickedSegments = GetClickedNodeSegments();
@@ -122,6 +144,10 @@ namespace Controllers
         public float curvyness = .5f; //degree
         public float heightChance = .2f; //% chance it raises or lowers the height
         public GameObject obj;
+        public TMPro.TMP_InputField segementsInput;
+        public TMPro.TMP_InputField lengthVariationInput;
+        public TMPro.TMP_InputField curvynessInput;
+        public TMPro.TMP_InputField heightChanceInput;
         public void GenerateMap(int segements, float curvyness)
         {
             ClearMap();

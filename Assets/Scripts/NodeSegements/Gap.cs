@@ -37,6 +37,49 @@ namespace TerrainSystem
 
             transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, gapSize);
         }
+
+        public override void ConvertToRamp()
+        {
+            base.ConvertToRamp();
+            NodeSegement next = nextSegements[0];
+            NodeSegement prev = previousSegements[0];
+
+            Ramp newPlatform = Factory.CreateRamp(next.transform.position, prev.transform.position);
+            newPlatform.previousSegements.Add(prev);
+            newPlatform.nextSegements.Add(next);
+            prev.nextSegements.Add(newPlatform);
+            next.previousSegements.Add(newPlatform);
+
+            prev.nextSegements.Remove(this);
+            next.previousSegements.Remove(this);
+            GameObject.DestroyImmediate(gameObject);
+            GameManager.controller.SetSelected(newPlatform);
+        }
+
+        public override void ConvertToPlatform()
+        {
+            base.ConvertToPlatform();
+            NodeSegement next = nextSegements[0];
+            NodeSegement prev = previousSegements[0];
+
+            if (next.transform.position.y == prev.transform.position.y)
+            {
+                Platform newPlatform = Factory.CreatePlatform(next.transform.position, prev.transform.position);
+                newPlatform.previousSegements.Add(prev);
+                newPlatform.nextSegements.Add(next);
+                prev.nextSegements.Add(newPlatform);
+                next.previousSegements.Add(newPlatform);
+
+                prev.nextSegements.Remove(this);
+                next.previousSegements.Remove(this);
+                GameObject.DestroyImmediate(gameObject);
+                GameManager.controller.SetSelected(newPlatform);
+            }
+            else
+            {
+                GameManager.Instance.DisplayWarning("Operation blocked, cannot convert to playform because the heights don't match");
+            }
+        }
     }
 
 

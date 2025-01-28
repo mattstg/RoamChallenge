@@ -12,7 +12,6 @@ namespace TerrainSystem
             ControllerActions.ModWidth,
             ControllerActions.ModHeight,
             ControllerActions.CycleTexture,
-            ControllerActions.Move,
             ControllerActions.Group_width,
             ControllerActions.Group_height,
             ControllerActions.Group_texture

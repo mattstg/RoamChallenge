@@ -8,6 +8,7 @@ namespace TerrainSystem
         public override NodeSegementType type => NodeSegementType.Ramp;
         public override ControllerActions[] availableSelectedOptions => new ControllerActions[]
         {
+            ControllerActions.ConvertToPlatform,
             ControllerActions.ModLength,
             ControllerActions.Delete,
         };
@@ -37,6 +38,56 @@ namespace TerrainSystem
             float gapSize = transform.localScale.z * Factory.RAMP_GAP_SIZE - (prev.transform.localScale.z / 2) - (next.transform.localScale.z / 2);
 
             transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, gapSize);
+        }
+
+        public override void ConvertToPlatform()
+        {
+            base.ConvertToPlatform();
+            NodeSegement next = nextSegements[0];
+            NodeSegement prev = previousSegements[0];
+
+            if (next.transform.position.y == prev.transform.position.y)
+            {
+                Platform newPlatform = Factory.CreatePlatform(next.transform.position, prev.transform.position);
+                newPlatform.previousSegements.Add(prev);
+                newPlatform.nextSegements.Add(next);
+                prev.nextSegements.Add(newPlatform);
+                next.previousSegements.Add(newPlatform);
+
+                prev.nextSegements.Remove(this);
+                next.previousSegements.Remove(this);
+                GameObject.DestroyImmediate(gameObject);
+                GameManager.controller.SetSelected(newPlatform);
+            }
+            else
+            {
+                GameManager.Instance.DisplayWarning("Operation blocked, cannot convert to playform because the heights don't match");
+            }
+        }
+
+        public override void Delete()
+        {
+            base.Delete();
+            NodeSegement next = nextSegements[0];
+            NodeSegement prev = previousSegements[0];
+
+            Gap newPlatform = Factory.CreateGap(next.transform.position, prev.transform.position);
+            newPlatform.previousSegements.Add(prev);
+            newPlatform.nextSegements.Add(next);
+            prev.nextSegements.Add(newPlatform);
+            next.previousSegements.Add(newPlatform);
+
+            prev.nextSegements.Remove(this);
+            next.previousSegements.Remove(this);
+            GameObject.DestroyImmediate(gameObject);
+            GameManager.controller.SetSelected(newPlatform);
+        }
+
+        public override void ModLength(bool increase)
+        {
+            base.ModLength(increase);
+            float amt = increase ? Controller.WIDTH_MOD : -Controller.WIDTH_MOD;
+            transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, transform.localScale.z + amt);
         }
     }
 }

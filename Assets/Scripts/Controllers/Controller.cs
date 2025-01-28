@@ -60,9 +60,9 @@ namespace Controllers
 
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
-                if (Input.GetKeyDown(KeyCode.Plus) || Input.GetKeyDown(KeyCode.KeypadPlus))
+                if (Input.GetKeyDown(KeyCode.Plus) || Input.GetKeyDown(KeyCode.KeypadPlus) || Input.GetKeyDown(KeyCode.Equals))
                     selected.Group_width(true);
-                else if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus))
+                else if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus) || Input.GetKeyDown(KeyCode.Underscore))
                     selected.Group_width(false);
                 else if (Input.GetKeyDown(KeyCode.LeftBracket))
                     selected.Group_texture(false);
@@ -77,12 +77,12 @@ namespace Controllers
                 selected.ConvertToPlatform();
             else if (Input.GetKeyDown(KeyCode.R))
                 selected.ConvertToRamp();
-            else if (Input.GetKeyDown(KeyCode.Plus) || Input.GetKeyDown(KeyCode.KeypadPlus))
+            else if (Input.GetKeyDown(KeyCode.Plus) || Input.GetKeyDown(KeyCode.KeypadPlus) || Input.GetKeyDown(KeyCode.Equals))
             {
                 selected.ModLength(true);
                 selected.ModWidth(true);
             }
-            else if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus))
+            else if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus) || Input.GetKeyDown(KeyCode.Underscore))
             {
                 selected.ModLength(false);
                 selected.ModWidth(false);
@@ -113,7 +113,7 @@ namespace Controllers
                 node.ModHeight(increase);
             }
 
-            manager.chain.FixAllRamps();
+            manager.chain.FixAllRampsAndGaps();
         }
 
         public void Group_width(bool increase, NodeSegement target)
@@ -124,7 +124,7 @@ namespace Controllers
                 node.ModWidth(increase);
             }
 
-            manager.chain.FixAllRamps();
+            manager.chain.FixAllRampsAndGaps();
         }
 
         public void Group_texture(bool increase, NodeSegement target)
@@ -205,7 +205,7 @@ namespace Controllers
             List<NodeSegement> clickedSegements = GameManager.GetClickedNodeSegments();
             if (clickedSegements.Contains(target))
             {
-                Debug.Log("Attempted to merge with ourselves, operation blocked, not allowed");
+                manager.DisplayWarning("Attempted to merge with ourselves, operation blocked, not allowed");
             }
             else if (clickedSegements.Count == 0)
             {
@@ -233,7 +233,7 @@ namespace Controllers
 
                 if(node == null)
                 {
-                    Debug.Log("We tried to merge with a non-corner, illegal operation blocked");
+                    manager.DisplayWarning("We tried to merge with a non-corner, illegal operation blocked");
                 }
                 else
                 {
