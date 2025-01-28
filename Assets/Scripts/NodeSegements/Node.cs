@@ -1,4 +1,5 @@
 using Controllers;
+using System.Collections.Generic;
 using UnityEngine;
 namespace TerrainSystem
 {
@@ -27,6 +28,16 @@ namespace TerrainSystem
             float amt = increase ? Controller.WIDTH_MOD : -Controller.WIDTH_MOD;
             transform.localScale = new Vector3(transform.localScale.x + amt, transform.localScale.y, transform.localScale.z + amt);
         }
+
+        public void ExternalMove(Vector2 delta)
+        {
+            transform.position = new Vector3(transform.position.x + delta.x, transform.position.y, transform.position.z + delta.y);
+            foreach (NodeSegement segement in nextSegements)
+                segement.Fix();
+            foreach (NodeSegement segement in previousSegements)
+                segement.Fix();
+        }
+
         
     }
 }

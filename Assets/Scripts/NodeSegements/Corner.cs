@@ -31,5 +31,11 @@ namespace TerrainSystem
             base.Delete();
             GameManager.controller.DeleteNode(this);
         }
+
+        public override void Move()
+        {
+            base.Move();
+            GameManager.controller.MoveNode(this);
+        }
     }
 }

@@ -25,6 +25,8 @@ namespace TerrainSystem
 
         public List<Vector3> GeneratePoints(int segements, float lengthVariation, float curviness, float heightChance)
         {
+            segements++; //Cause some dumb math
+
             // Get the start and end positions
             Vector3 startPos = start.transform.position; 
             Vector3 endPos = end.transform.position; 
@@ -94,6 +96,7 @@ namespace TerrainSystem
             }
 
             // Add the end point
+            //points.RemoveAt(points.Count - 1);//Cause some dumb stuff
             points.Add(endPos);
 
             return points;
@@ -108,15 +111,16 @@ namespace TerrainSystem
 
             //All segements inbetween are random, if elevation change, then its a platform
             bool gapLastMade = false;
-            for (int i = 1; i < points.Count - 2; i++) //second to last seg is ramp, last point is exit
+            for (int i = 1; i < points.Count - 1; i++) //second to last seg is ramp, last point is exit
             {
+                bool lastElement = i == points.Count - 2;
                 Vector3 startPos = points[i];
-                Vector3 endPos = points[i + 1];
+                Vector3 endPos = (lastElement) ? end.transform.position :points[i + 1];
 
                 Vector3 size = new Vector3(1, 1, 1); // Adjust size as needed
                 orderedSegments.Add(Factory.CreateCorner(points[i], size));
 
-                if (startPos.y != endPos.y)
+                if (lastElement || startPos.y != endPos.y)
                     orderedSegments.Add(Factory.CreateRamp(startPos, endPos));
                 else
                 {
@@ -136,7 +140,7 @@ namespace TerrainSystem
             }
 
             //last seg always ramp
-            orderedSegments.Add(Factory.CreateRamp(points[points.Count - 2], points[points.Count - 1]));
+            //orderedSegments.Add(Factory.CreateRamp(points[points.Count - 2], points[points.Count - 1]));
             orderedSegments.Add(end);
         }
 

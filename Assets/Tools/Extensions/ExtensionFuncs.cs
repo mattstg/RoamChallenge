@@ -224,6 +224,7 @@ public static class ExtensionFuncs
     }
 
     //This function only points to children and does not include the parent
+    //This function can retrieve children if they were destroyed in the same frame!! So does foreach apparently tho...
     public static Transform[] ChildrenArray(this Transform t)
     {
         return t.Cast<Transform>().ToArray();

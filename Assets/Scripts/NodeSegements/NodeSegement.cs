@@ -86,5 +86,10 @@ namespace TerrainSystem
         {
             GameManager.controller.Group_texture(increase, this);
         }
+     
+        public virtual void Fix()
+        {
+
+        }
     }
 }

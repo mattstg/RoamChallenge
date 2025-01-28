@@ -200,6 +200,17 @@ namespace Controllers
             //GameObject.Destroy(toDelete.gameObject);
         }
 
+        bool moveMode = false;
+        public void MoveNode(Corner toMove)
+        {
+            if(!moveMode)
+            {
+                moveMode = false;
+                return;
+            }
+            //toMove.transform.position = new Vector3(0, 0, 0);
+        }
+
     }
 
 

@@ -27,6 +27,7 @@ namespace Controllers
             controlsUI.SetupUIDict();
         }
 
+        
         void Update()
         {
             if (Input.GetMouseButtonDown(0)) 
@@ -47,8 +48,59 @@ namespace Controllers
                 else
                     controller.SetSelected(null);
             }
+
+            if (Input.GetMouseButton(0) && controller.selected != null && controller.selected is Node corner)
+            {
+                moveTimer += Time.deltaTime;
+                if(moveModeActive)
+                {
+                    MoveModeUpdate();
+                }
+                else if (moveTimer > holdMoveTimer)
+                {
+                    MoveModeActivated();
+                }
+            }
+            else
+            {
+                moveTimer = 0;
+                if (moveModeActive)
+                    MoveModeDeactivate();
+            }
+
             controller.Update();
         }
+        #region Move Mode
+        const float holdMoveTimer = .3f;
+        float moveTimer = 0;
+        bool moveModeActive = false;
+        public float MOVE_SENSITIVITY = .25f;
+        void MoveModeActivated()
+        {
+            Cursor.visible = false;
+            moveModeActive = true;
+        }
+
+        void MoveModeUpdate()
+        {
+            Node n = controller.selected as Node;
+            if (n == null)
+            {
+                MoveModeDeactivate();
+                return;
+            }
+
+            Vector2 mouseDelta = Input.mousePositionDelta;
+            n.ExternalMove(mouseDelta * MOVE_SENSITIVITY);
+        }
+
+        void MoveModeDeactivate()
+        {
+            Cursor.visible = true;
+            moveModeActive = false;
+        }
+
+        #endregion
 
         [ExposeMethodInEditor()]
         public void ClearMap()
