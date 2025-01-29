@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TerrainSystem;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 namespace Controllers
 {
@@ -16,6 +17,9 @@ namespace Controllers
         public Material[] materials;
         public Material glowMat;
         public TMPro.TextMeshProUGUI warningText;
+        public FreeCamera freeCamera;
+        public PlaneGenerator planeGenerator;
+        public MeshManipulation meshManipulation;
         
 
         public static Controller controller; //Should be singleton, but quick prototype dirty code
@@ -29,6 +33,8 @@ namespace Controllers
             mapGenerator = new MapGenerator(this);
             controller = new Controller(this);
             controlsUI.SetupUIDict();
+            planeGenerator.GeneratePlane();
+            meshManipulation.LinkMesh();
         }
 
         float warningTimer;
@@ -44,6 +50,27 @@ namespace Controllers
             if(warningTimer < 0)
                 warningText.gameObject.SetActive(false);
 
+            if(Input.GetKeyDown(KeyCode.T))
+            {
+                //;
+                planeGenerator.PerlinTheGrid();
+            }
+
+            if(Input.GetKeyDown(KeyCode.C))
+            {
+                freeCamera.enabled = !freeCamera.enabled;
+                if (freeCamera.enabled)
+                {
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                }
+                else
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
+                }
+            }
+
             if(Input.GetKeyDown(KeyCode.G))
             {
                 segements = int.Parse(segementsInput.text);
@@ -53,7 +80,7 @@ namespace Controllers
                 GenerateMap();
             }
 
-            if (Input.GetMouseButtonDown(0)) 
+            if (Input.GetMouseButtonDown(0) && !Input.GetKey(KeyCode.LeftAlt)) 
             {
                 List<NodeSegement> clickedSegments = GetClickedNodeSegments();
                 if (clickedSegments.Count > 0)
@@ -72,7 +99,7 @@ namespace Controllers
                     controller.SetSelected(null);
             }
 
-            if (Input.GetMouseButton(0) && controller.selected != null && controller.selected is Node corner)
+            if (Input.GetMouseButton(0) && controller.selected != null && controller.selected is Node corner && !Input.GetKey(KeyCode.LeftAlt))
             {
                 moveTimer += Time.deltaTime;
                 if(moveModeActive)
@@ -94,14 +121,17 @@ namespace Controllers
             controller.Update();
         }
         #region Move Mode
-        const float holdMoveTimer = .3f;
+        const float holdMoveTimer = .2f;
         float moveTimer = 0;
         bool moveModeActive = false;
         public float MOVE_SENSITIVITY = .25f;
         void MoveModeActivated()
         {
-            Cursor.visible = false;
-            moveModeActive = true;
+            if (Cursor.lockState != CursorLockMode.Locked && Cursor.visible)
+            {
+                Cursor.visible = false;
+                moveModeActive = true;
+            }
         }
 
         void MoveModeUpdate()
@@ -113,9 +143,27 @@ namespace Controllers
                 return;
             }
 
-            Vector2 mouseDelta = Input.mousePositionDelta;
-            n.ExternalMove(mouseDelta * MOVE_SENSITIVITY);
+            Vector2 mouseDelta = Input.mousePositionDelta * MOVE_SENSITIVITY;
+
+            // Get the camera's forward and right vectors
+            Vector3 cameraForward = Camera.main.transform.forward;
+            Vector3 cameraRight = Camera.main.transform.right;
+
+            // Ignore the vertical (Y-axis) component for ground movement
+            cameraForward.y = 0;
+            cameraRight.y = 0;
+
+            // Normalize the vectors to ensure consistent movement
+            cameraForward.Normalize();
+            cameraRight.Normalize();
+
+            // Calculate movement relative to the camera's orientation
+            Vector3 moveDirection = (cameraRight * mouseDelta.x + cameraForward * mouseDelta.y);
+            //n.transform.position += moveDirection;
+            // Apply movement to the object's position
+            n.ExternalMove(moveDirection);
         }
+
 
         void MoveModeDeactivate()
         {
@@ -155,7 +203,7 @@ namespace Controllers
             mapGenerator.GenerateMap(points);
         }
 
-        public static List<NodeSegement> GetClickedNodeSegments()
+        /*public static List<NodeSegement> GetClickedNodeSegments()
         {
             // Ensure the main camera is available
             Camera mainCamera = Camera.main;
@@ -173,6 +221,41 @@ namespace Controllers
             List<NodeSegement> nodeSegments = hits
                 .Select(hit => hit.collider.GetComponentInParent<NodeSegement>())
                 .Where(segment => segment != null)
+                .OrderBy(segment => segment.type) // Sort by NodeSegementType
+                .ToList();
+
+            return nodeSegments;
+        }*/
+
+        public static float DistanceThreshold = 1f;
+        public static List<NodeSegement> GetClickedNodeSegments()
+        {
+            // Ensure the main camera is available
+            Camera mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                Debug.LogError("No main camera found in the scene.");
+                return new List<NodeSegement>();
+            }
+
+            // Cast a ray from the mouse position
+            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit[] hits = Physics.RaycastAll(ray);
+
+            if (hits.Length == 0)
+            {
+                return new List<NodeSegement>();
+            }
+
+            // Find the first hit point
+            RaycastHit firstHit = hits.OrderBy(hit => hit.distance).First();
+            float firstHitDistance = firstHit.distance;
+
+            // Filter hits by distance threshold and NodeSegment presence
+            List<NodeSegement> nodeSegments = hits
+                .Where(hit => hit.distance <= firstHitDistance + DistanceThreshold) // Check if within threshold
+                .Select(hit => hit.collider.GetComponentInParent<NodeSegement>())
+                .Where(segment => segment != null) // Exclude null segments
                 .OrderBy(segment => segment.type) // Sort by NodeSegementType
                 .ToList();
 

@@ -31,9 +31,9 @@ namespace TerrainSystem
             transform.localScale = new Vector3(transform.localScale.x + amt, transform.localScale.y, transform.localScale.z + amt);
         }
 
-        public void ExternalMove(Vector2 delta)
+        public void ExternalMove(Vector3 delta)
         {
-            transform.position = new Vector3(transform.position.x + delta.x, transform.position.y, transform.position.z + delta.y);
+            transform.position = new Vector3(transform.position.x + delta.x, transform.position.y, transform.position.z + delta.z);
             foreach (NodeSegement segement in nextSegements)
                 segement.Fix();
             foreach (NodeSegement segement in previousSegements)

@@ -55,8 +55,9 @@ namespace Controllers
         //This is a throwaway prototype, so let's do the fast thing
         public void VeryGrossMethod()
         {
-            if(selected == null)
+            if(selected == null || Input.GetKey(KeyCode.LeftAlt))
                 return;
+
 
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
