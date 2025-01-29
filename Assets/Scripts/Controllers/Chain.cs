@@ -1,6 +1,7 @@
 using UnityEngine;
 using TerrainSystem;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Controllers
 {
@@ -55,10 +56,7 @@ namespace Controllers
             FixAllRampsAndGaps();
         }
 
-
-
         #region repairs
-
         public void FixAllRampsAndGaps()
         {
             NodeSegement[] children = transform.ChildrenArray().CollectionFromForEach(t => t.GetComponent<NodeSegement>()).ToArray();
@@ -70,9 +68,11 @@ namespace Controllers
                 }
             }
         }
-
-
-
         #endregion
+
+        public Collider[] GetAllColliders()
+        {
+            return transform.GetComponentsInChildren<Collider>();
+        }
     }
 }

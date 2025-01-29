@@ -15,7 +15,15 @@ public class MeshManipulation : MonoBehaviour
 
     private void StartEdit()
     {
+        editMode = true;
         LinkMesh();
+    }
+
+    [ExposeMethodInEditor()]
+    public void EndEdit()
+    {
+        editMode = false;
+        ClampMeshHeightForBuildings(Controllers.GameManager.Instance.chain.GetAllColliders());
     }
 
     public void LinkMesh()
@@ -77,11 +85,8 @@ public class MeshManipulation : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.LeftAlt))
         {
-            if(!editMode)
-            {
-                editMode = true;
+            if (!editMode)
                 StartEdit();
-            }
 
             if (Input.GetMouseButton(0)) // Left mouse button to raise terrain
             {
@@ -92,8 +97,8 @@ public class MeshManipulation : MonoBehaviour
                 HandleMouseInput(false);
             }
         }
-        else
-            editMode = false;
+        else if (editMode)
+            EndEdit();
     }
 
     private void HandleMouseInput(bool isRaising)
@@ -113,4 +118,76 @@ public class MeshManipulation : MonoBehaviour
             }
         }
     }
+
+    public void ClampMeshHeightForBuildings(Collider[] buildings, float clearanceOffset = 0.1f)
+    {
+        LinkMesh();
+        if (mesh == null || buildings == null || buildings.Length == 0)
+        {
+            Debug.LogError("Invalid mesh or buildings array.");
+            return;
+        }
+
+        Vector3[] vertices = mesh.vertices;
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            Vector3 worldVertex = transform.TransformPoint(mesh.vertices[i]); // Convert to world space if needed
+            foreach (Collider building in buildings)
+            {
+                if (IsPointInsideCollider(building, worldVertex))
+                {
+                    // Lower the vertex height to just below the building
+                    float buildingBaseHeight = building.bounds.min.y;
+                    Vector3 finalV = vertices[i];
+                    Vector3 yValueInLocal = transform.InverseTransformPoint(new Vector3(0, buildingBaseHeight - clearanceOffset, 0));
+
+
+                    vertices[i].y = yValueInLocal.y; // transform.InverseTransformPoint(buildingBaseHeight - clearanceOffset);
+                    break; // No need to check other buildings once adjusted
+                }
+                else
+                {
+                    float damp = GetDampingMult(building, worldVertex, distanceAffect, clearanceOffset);//, maxDampFactor);
+                    if(damp != 1)
+                        vertices[i].y = damp * vertices[i].y;
+                }
+            }
+        }
+
+        mesh.vertices = vertices; // Apply the modified vertices
+        mesh.RecalculateNormals(); // Update for lighting
+        mesh.RecalculateBounds(); // Ensure correct mesh bounds
+    }
+
+    public float distanceAffect = 3;
+    public float maxDampFactor = 3;
+
+    private static bool IsPointInsideCollider(Collider collider, Vector3 worldPoint)
+    {
+        // Get collider world-space boundaries
+        Bounds bounds = new Bounds(collider.bounds.center, collider.bounds.size);
+
+
+        return (worldPoint.x >= bounds.min.x && worldPoint.x <= bounds.max.x) &&
+                 (worldPoint.z >= bounds.min.z && worldPoint.z <= bounds.max.z) &&
+                 (worldPoint.y >= bounds.min.y); // Only check if the vertex is inside or above
+    }
+
+    private static float GetDampingMult(Collider collider, Vector3 worldPoint, float distanceAffect, float clearanceOffset)
+    {
+        // Get collider world-space boundaries
+        Bounds bounds = new Bounds(collider.bounds.center, collider.bounds.size * distanceAffect);
+        Vector3 closestPoint = bounds.ClosestPoint(worldPoint);
+        float distanceToEdge = Vector3.Distance(worldPoint, closestPoint);
+        if(distanceToEdge > distanceAffect)
+            return 1;
+
+        float buildingBaseHeight = bounds.min.y - clearanceOffset;
+
+        // Apply a damping factor based on distance (stronger near the building)
+        return Mathf.Clamp01(distanceToEdge / distanceAffect);
+        //return Mathf.Lerp(worldPoint.y, buildingBaseHeight, dampingFactor);
+    }
+
 }
