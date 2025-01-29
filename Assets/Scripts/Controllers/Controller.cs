@@ -100,7 +100,7 @@ namespace Controllers
                 selected.Delete();
             else if (Input.GetKeyDown(KeyCode.D))
                 selected.Divide();
-            else if (Input.GetKeyDown(KeyCode.T))
+            else if (Input.GetKeyDown(KeyCode.N))
                 selected.ToggleVisible();
             else if (Input.GetKeyDown(KeyCode.B))
                 Branch(selected);

@@ -50,10 +50,16 @@ namespace Controllers
             if(warningTimer < 0)
                 warningText.gameObject.SetActive(false);
 
+            if(Input.GetKeyDown(KeyCode.V))
+            {
+                meshManipulation.ClampMeshHeightForBuildings(Controllers.GameManager.Instance.chain.GetAllColliders());
+            }
+
             if(Input.GetKeyDown(KeyCode.T))
             {
                 //;
                 planeGenerator.PerlinTheGrid();
+                meshManipulation.ClampMeshHeightForBuildings(Controllers.GameManager.Instance.chain.GetAllColliders());
             }
 
             if(Input.GetKeyDown(KeyCode.C))
@@ -77,7 +83,7 @@ namespace Controllers
                 lengthVariation = float.Parse(lengthVariationInput.text);
                 curvyness = float.Parse(curvynessInput.text);
                 heightChance = float.Parse(heightChanceInput.text);
-                GenerateMap();
+                GenerateMap();                
             }
 
             if (Input.GetMouseButtonDown(0) && !Input.GetKey(KeyCode.LeftAlt)) 
@@ -163,8 +169,6 @@ namespace Controllers
             // Apply movement to the object's position
             n.ExternalMove(moveDirection);
         }
-
-
         void MoveModeDeactivate()
         {
             Cursor.visible = true;
@@ -185,6 +189,12 @@ namespace Controllers
             ClearMap();
             GenerateMap(segements, curvyness);
             chain.BakeChain();
+            Invoke("DelayCut", .1f);
+        }
+
+        void DelayCut()
+        {
+            meshManipulation.ClampMeshHeightForBuildings(Controllers.GameManager.Instance.chain.GetAllColliders());
         }
 
         public int segements = 5;

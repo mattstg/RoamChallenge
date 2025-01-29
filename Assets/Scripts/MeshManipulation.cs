@@ -124,7 +124,6 @@ public class MeshManipulation : MonoBehaviour
         LinkMesh();
         if (mesh == null || buildings == null || buildings.Length == 0)
         {
-            Debug.LogError("Invalid mesh or buildings array.");
             return;
         }
 
